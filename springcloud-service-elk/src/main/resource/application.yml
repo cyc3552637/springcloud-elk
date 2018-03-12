@@ -7,6 +7,8 @@ server:
 spring:
   zipkin:
     base-url: http://localhost:9211
+  application:
+    name: service1
   sleuth:
     sampler:
       percentage: 1.0
