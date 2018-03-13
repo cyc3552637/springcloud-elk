@@ -72,5 +72,5 @@ management:
   security:
     enabled: false
 logging:
+  config: classpath:spring-logback.xml
   file: D:\logelk\${spring.application.name}-${server.port}.log
-    
