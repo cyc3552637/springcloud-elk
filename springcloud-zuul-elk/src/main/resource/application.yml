@@ -6,9 +6,14 @@ server:
   port: 8769
 spring:
   zipkin:
-    base-url: http://localhost:9211
+    base-url: http://localhost:9411  # http://localhost:9211就是可视化zipkin
   application:
     name: service-zuul
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: cyc
+    password: 123
   sleuth:
     sampler:
       percentage: 1.0
@@ -23,6 +28,10 @@ zuul:
     servic-rpc-a:
       path: /service-a/**
       serviceId: service1
+      sensitiveHeaders:
+    servic-rpc-b:
+      path: /service-b/**
+      serviceId: service2
       sensitiveHeaders:
   ribbonIsolationStrategy: THREAD
   threadPool:
@@ -48,13 +57,13 @@ hystrix:
         isolation:
           thread:
             timeoutInMilliseconds: 3000
-service-rpc1:
+service1:
   ribbon: 
     ReadTimeout: 1000
     ConnectTimeout: 1000
     MaxAutoRetries: 0
     MaxAutoRetriesNextServer: 1
-service-rpc2:
+service2:
   ribbon: 
     ReadTimeout: 1000 
     ConnectTimeout: 1000

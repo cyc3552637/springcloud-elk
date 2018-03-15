@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+      
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <springProperty scope="context" name="springPort" source="server.port"/>  
+    <!-- 日志在工程中的输出位置 -->
+    <springProperty scope="context" name="LOG_FILE" source="logging.file"/>
+   <!-- <property name="LOG_FILE" value="D://logelk/${spring.application.name}-${server.port}"/> --> 
+    <!-- 日志输出样式 -->
+     <property name="LOG_PATTERN"
+    value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([${springAppName:-},%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-Span-Export:-}]){yellow} %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        
+
+    <!-- 控制台Appender -->
+   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">           
+            <level>INFO</level>
+        </filter>
+         <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+       </encoder>
+    </appender> 
+
+    <!-- 输出本地的日志文件，由Spring Admin查看使用 -->
+    <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+       </encoder>
+    </appender>
+    
+    <!-- ELK本地模式，生成本地的Json文件，由每台服务器本地的logstach读取Json文件 -->
+ <!--   <appender name="logstash" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.json.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                          "severity": "%level",
+                          "service": "${springAppName:-}",
+                          "port": "${springPort:-}",
+                          "trace": "%X{X-B3-TraceId:-}",
+                          "span": "%X{X-B3-SpanId:-}",
+                          "exportable": "%X{X-Span-Export:-}",
+                          "pid": "${PID:-}",
+                          "thread": "%thread",
+                          "class": "%logger{40}",
+                          "rest": "%message"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>-->  
+    
+     <!-- ELK远程，生成本地的Json流，传输到logstash的服务 -->
+     <appender name="logstash"  
+        class="net.logstash.logback.appender.LogstashTcpSocketAppender">  
+        <destination>127.0.0.1:9250</destination>  
+        <!-- 日志输出编码 -->  
+        <encoder  
+            class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">  
+            <providers>  
+                <timestamp>  
+                    <timeZone>UTC</timeZone>  
+                </timestamp>  
+                <pattern>  
+                    <pattern>  
+                        {  
+                        "severity": "%level",  
+                        "service": "${springAppName:-}",
+                        "port": "${springPort:-}", 
+                        "trace": "%X{X-B3-TraceId:-}",  
+                        "span": "%X{X-B3-SpanId:-}",  
+                        "exportable": "%X{X-Span-Export:-}",  
+                        "pid": "${PID:-}",  
+                        "thread": "%thread",  
+                        "class": "%logger{40}",  
+                        "rest": "%message"  
+                        }  
+                    </pattern>  
+                </pattern>  
+            </providers>  
+        </encoder>  
+    </appender>  
+      
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="logfile"/>
+        <appender-ref ref="logstash"/>
+    </root>
+</configuration>

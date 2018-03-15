@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>springcloud-zuul-elk</name>
+	<name>springcloud-zipkinstream-elk</name>
 	<comment></comment>
 	<projects>
 	</projects>
